@@ -1,4 +1,5 @@
 import app from "../src/app.ts";
+import "dotenv/config";
 
 const PORT = 3000;
 
