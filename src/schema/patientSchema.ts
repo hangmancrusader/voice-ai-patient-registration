@@ -7,6 +7,10 @@ const US_STATES = [
   "NM","NY","NC","ND","OH","OK","OR","PA","RI","SC",
   "SD","TN","TX","UT","VT","VA","WA","WV","WI","WY","DC"
 ];
+const optionalString = z
+  .string()
+  .optional()
+  .transform((value) => value?.trim() === "" ? undefined : value);
 
 export const patientSchema = z.object({
   first_name: z.string().min(1).max(50).regex(/^[A-Za-z'-]+$/),
@@ -21,10 +25,10 @@ export const patientSchema = z.object({
 
   phone_number: z.string().regex(/^\d{10}$/, "Phone must contain 10 digits"),
 
-  email: z.string().email().optional(),
+ 
 
   address_line_1: z.string().min(1),
-  address_line_2: z.string().optional(),
+  
 
   city: z.string().min(1).max(100),
 
@@ -35,15 +39,30 @@ export const patientSchema = z.object({
 
   zip_code: z.string().regex(/^\d{5}(-\d{4})?$/),
 
-  insurance_provider: z.string().optional(),
-  insurance_member_id: z.string().optional(),
+  
+  email: z
+  .union([z.string().email(), z.literal("")])
+  .optional()
+  .transform((value) => value === "" ? undefined : value),
 
-  preferred_language: z.string().default("English"),
+address_line_2: optionalString,
 
-  emergency_contact_name: z.string().optional(),
-  emergency_contact_phone: z
-    .string()
-    .regex(/^\d{10}$/)
-    .optional()
+insurance_provider: optionalString,
+
+insurance_member_id: optionalString,
+
+emergency_contact_name: optionalString,
+
+emergency_contact_phone: z
+  .union([
+    z.string().regex(/^\d{10}$/, "Emergency contact phone must contain 10 digits"),
+    z.literal("")
+  ])
+  .optional()
+  .transform((value) => value === "" ? undefined : value),
+preferred_language: z
+  .string()
+  .optional()
+  .transform((value) => value?.trim() === "" ? "English" : value ?? "English"),
 });
 export const updatePatientSchema = patientSchema.partial();
